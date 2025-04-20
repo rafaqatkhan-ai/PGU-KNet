@@ -26,14 +26,15 @@ class PositionalGatingUnit(tf.keras.layers.Layer):
 class Cast(tf.keras.layers.Layer):
     def __init__(self, dtype='float32', **kwargs):
         super().__init__(**kwargs)
-        self.dtype = tf.dtypes.as_dtype(dtype)
+        # Use a property instead of directly assigning dtype
+        self._dtype = tf.dtypes.as_dtype(dtype)
 
     def call(self, inputs):
-        return tf.cast(inputs, self.dtype)
+        return tf.cast(inputs, self._dtype)
 
     def get_config(self):
         config = super().get_config()
-        config.update({'dtype': self.dtype.name})
+        config.update({'dtype': self._dtype.name})
         return config
 
 # Load the model safely with custom layers
