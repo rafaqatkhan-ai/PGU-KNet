@@ -64,89 +64,234 @@ model = load_model()
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
 # UI - Customizing appearance
-st.set_page_config(page_title="PGU-KNet CT Kidney Image Classifier", page_icon="🧠", layout="centered")
+st.set_page_config(
+    page_title="PGU-KNet CT Kidney Image Classifier", 
+    page_icon="🧠", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Custom CSS to make the app more attractive
+# Custom CSS for modern attractive design
 st.markdown("""
     <style>
-    /* Background Gradient */
+    /* Main container */
     .main {
-        background: linear-gradient(to right, #4e8eff, #00c6ff);
-        color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
     }
-    .title {
-        font-size: 36px;
-        color: #ffffff;
-        font-weight: bold;
-        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    }
-    .upload-text {
-        font-size: 18px;
-        color: #ffffff;
-    }
-    .result {
-        font-size: 24px;
-        color: #4CAF50;
-        font-weight: bold;
-        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-    }
-    .confidence {
-        font-size: 20px;
-        color: #FF5722;
-    }
-    .prediction-box {
-        background-color: rgba(255, 255, 255, 0.8);
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 20px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    .btn {
-        background-color: #FF5722;
+    
+    /* Gradient header */
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        font-size: 16px;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
+        padding: 2rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
     }
-    .btn:hover {
-        background-color: #ff7043;
+    
+    /* Title styling */
+    .title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    /* Subtitle */
+    .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    /* Upload container */
+    .upload-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    
+    /* Upload button styling */
+    .stFileUploader > div > div {
+        border: 2px dashed #667eea;
+        border-radius: 10px;
+        background: rgba(102, 126, 234, 0.05);
+    }
+    
+    /* Prediction card */
+    .prediction-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-left: 5px solid #667eea;
+        margin-top: 1rem;
+    }
+    
+    /* Result text */
+    .result {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Confidence text */
+    .confidence {
+        font-size: 1.3rem;
+        color: #7f8c8d;
+    }
+    
+    /* Highlight text */
+    .highlight {
+        color: #667eea;
+        font-weight: 700;
+    }
+    
+    /* Progress bar color */
+    .stProgress > div > div > div > div {
+        background-color: #667eea;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.7rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Custom radio buttons */
+    .stRadio > div {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .stRadio > div > label {
+        margin-right: 15px;
+        margin-left: 5px;
+    }
+    
+    /* Image container */
+    .image-container {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Footer */
+    .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 1.5rem;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .title {
+            font-size: 2rem;
+        }
+        .subtitle {
+            font-size: 1rem;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
 
-# UI content
-st.markdown('<div class="main">', unsafe_allow_html=True)
-st.title("🧠 PGU-KNet CT Kidney Image Classifier")
-st.write("Upload a CT kidney image, and the model will predict its class.")
+# Header section
+st.markdown("""
+    <div class="header">
+        <div class="title">🧠 PGU-KNet CT Kidney Image Classifier</div>
+        <div class="subtitle">Advanced deep learning model for classifying kidney CT scans into Cyst, Normal, Stone, or Tumor</div>
+    </div>
+""", unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("📁 Upload Image", type=["jpg", "jpeg", "png"])
+# Main content
+col1, col2 = st.columns([1, 1])
 
-if uploaded_file is not None:
-    # Open and display the uploaded image
-    image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+with col1:
+    st.markdown("""
+        <div class="upload-container">
+            <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">📁 Upload Your CT Scan</h3>
+    """, unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+    
+    if uploaded_file is not None:
+        # Open and display the uploaded image
+        image = Image.open(uploaded_file).convert("RGB")
+        st.markdown('<div class="image-container">', unsafe_allow_html=True)
+        st.image(image, caption="Uploaded CT Scan", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # Preprocess
-    img_size = (224, 224)
-    image = image.resize(img_size)
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+with col2:
+    if uploaded_file is not None:
+        # Preprocess
+        img_size = (224, 224)
+        image = image.resize(img_size)
+        img_array = np.array(image) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
-    # Show progress bar while predicting
-    with st.spinner('Classifying the image...'):
-        prediction = model.predict(img_array)
-        predicted_class = class_names[np.argmax(prediction)]
-        confidence = np.max(prediction)
+        # Show progress bar while predicting
+        with st.spinner('Analyzing the CT scan...'):
+            progress_bar = st.progress(0)
+            for percent_complete in range(100):
+                time.sleep(0.01)  # Simulate processing time
+                progress_bar.progress(percent_complete + 1)
+            
+            prediction = model.predict(img_array)
+            predicted_class = class_names[np.argmax(prediction)]
+            confidence = np.max(prediction)
 
-    # Show result in attractive format
-    st.markdown(f'<div class="prediction-box">', unsafe_allow_html=True)
-    st.markdown(f'<p class="result">✅ **Prediction:** {predicted_class}</p>', unsafe_allow_html=True)
-    st.markdown(f'<p class="confidence">🔍 **Confidence:** {confidence:.2%}</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        # Show result in attractive format
+        st.markdown(f"""
+            <div class="prediction-card">
+                <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">🔍 Analysis Results</h3>
+                <div class="result">Predicted Condition: <span class="highlight">{predicted_class}</span></div>
+                <div class="confidence">Confidence Level: <span class="highlight">{confidence:.2%}</span></div>
+                
+                <div style="margin-top: 2rem;">
+                    <h4 style="color: #2c3e50; margin-bottom: 0.5rem;">Probability Distribution:</h4>
+        """, unsafe_allow_html=True)
+        
+        # Show probability distribution as a bar chart
+        prob_data = {class_names[i]: float(prediction[0][i]) for i in range(len(class_names))}
+        st.bar_chart(prob_data, color="#667eea", height=250)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown("""
+            <div style="background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 100%; 
+                     display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" width="120" style="opacity: 0.7; margin-bottom: 1.5rem;">
+                <h3 style="color: #2c3e50;">No Image Uploaded</h3>
+                <p style="color: #7f8c8d;">Upload a kidney CT scan image to get started with the analysis.</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-# Closing the div of main layout
-st.markdown('</div>', unsafe_allow_html=True)
+# Footer
+st.markdown("""
+    <div class="footer">
+        <p>PGU-KNet CT Kidney Classifier | Developed with TensorFlow and Streamlit</p>
+    </div>
+""", unsafe_allow_html=True)
+
+# Add some space at the bottom
+st.markdown("<div style='margin-bottom: 100px;'></div>", unsafe_allow_html=True)
