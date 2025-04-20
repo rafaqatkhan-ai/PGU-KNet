@@ -31,7 +31,6 @@ class PositionalGatingUnit(tf.keras.layers.Layer):
 class Cast(tf.keras.layers.Layer):
     def __init__(self, dtype='float32', **kwargs):
         super().__init__(**kwargs)
-        # Use a property instead of directly assigning dtype
         self._dtype = tf.dtypes.as_dtype(dtype)
 
     def call(self, inputs):
@@ -70,34 +69,51 @@ st.set_page_config(page_title="CT Kidney Image Classifier", page_icon="🧠", la
 # Custom CSS to make the app more attractive
 st.markdown("""
     <style>
+    /* Background Gradient */
     .main {
-        background-color: #f4f4f9;
-        color: #333;
-        padding: 20px;
+        background: linear-gradient(to right, #4e8eff, #00c6ff);
+        color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
     .title {
         font-size: 36px;
-        color: #1e1e1e;
+        color: #ffffff;
         font-weight: bold;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
     .upload-text {
         font-size: 18px;
-        color: #0073e6;
+        color: #ffffff;
     }
     .result {
         font-size: 24px;
         color: #4CAF50;
         font-weight: bold;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
     }
     .confidence {
         font-size: 20px;
         color: #FF5722;
     }
     .prediction-box {
-        background-color: #e0f7fa;
+        background-color: rgba(255, 255, 255, 0.8);
         padding: 20px;
         border-radius: 10px;
         margin-top: 20px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .btn {
+        background-color: #FF5722;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .btn:hover {
+        background-color: #ff7043;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -132,4 +148,5 @@ if uploaded_file is not None:
     st.markdown(f'<p class="confidence">🔍 **Confidence:** {confidence:.2%}</p>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+# Closing the div of main layout
 st.markdown('</div>', unsafe_allow_html=True)
