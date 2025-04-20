@@ -227,7 +227,7 @@ with col1:
             # Open and display the uploaded image
             image = Image.open(uploaded_file).convert("RGB")
             st.markdown('<div class="image-container">', unsafe_allow_html=True)
-            st.image(image, caption="Uploaded CT Scan", use_column_width=True)
+            st.image(image, caption="Uploaded CT Scan", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         except Exception as e:
             st.error("❌ Failed to process the image. Please try another file.")
