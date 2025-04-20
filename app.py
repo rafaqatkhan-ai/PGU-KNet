@@ -72,9 +72,9 @@ st.write("Upload a CT kidney image, and the model will predict its class.")
 uploaded_file = st.file_uploader("📁 Upload Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
+    # Open and display the uploaded image
     image = Image.open(uploaded_file).convert("RGB")
-    st.image('your_image.png', use_column_width=True)
-
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Preprocess
     img_size = (224, 224)
