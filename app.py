@@ -64,71 +64,71 @@ model = load_model()
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
 # UI - Customizing appearance
-st.set_page_config(page_title="CT Kidney Image Classifier", page_icon="🧠", layout="centered")
+st.set_page_config(page_title="PGU-KNet CT Kidney Image Classifier", page_icon="🧠", layout="centered")
 
 # Custom CSS to make the app more attractive
 st.markdown("""
     <style>
-    body {
-        background-color: #f0f0f5;
-        color: #333333;
-        font-family: 'Arial', sans-serif;
+    /* Background Gradient */
+    .main {
+        background: linear-gradient(to right, #4e8eff, #00c6ff);
+        color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
     .title {
-        text-align: center;
-        font-size: 2.5em;
-        color: #2c3e50;
-        margin-top: -50px;
+        font-size: 36px;
+        color: #ffffff;
+        font-weight: bold;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
-    .subtitle {
-        text-align: center;
-        font-size: 1.2em;
-        color: #7f8c8d;
-        margin-bottom: 50px;
-    }
-    .footer {
-        text-align: center;
-        font-size: 0.9em;
-        color: #bdc3c7;
-        margin-top: 50px;
-    }
-    .uploaded-image {
-        border: 2px solid #2c3e50;
-        border-radius: 10px;
-        margin: 20px 0;
-    }
-    .prediction-box {
-        border: 2px solid #27ae60;
-        background-color: #1f1e1c;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
+    .upload-text {
+        font-size: 18px;
         color: #ffffff;
     }
+    .result {
+        font-size: 24px;
+        color: #4CAF50;
+        font-weight: bold;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .confidence {
+        font-size: 20px;
+        color: #FF5722;
+    }
+    .prediction-box {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
     .btn {
-        background-color: #2ecc71;
+        background-color: #FF5722;
         color: white;
         font-size: 16px;
-        padding: 10px 20px;
         border-radius: 5px;
+        padding: 10px 20px;
         cursor: pointer;
     }
     .btn:hover {
-        background-color: #27ae60;
+        background-color: #ff7043;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # UI content
-st.markdown('<div class="title">🧠 CT Kidney Image Classifier</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Upload a CT kidney image, and the model will predict its class.</div>', unsafe_allow_html=True)
+st.markdown('<div class="main">', unsafe_allow_html=True)
+st.title("🧠 CT Kidney Image Classifier")
+st.write("Upload a CT kidney image, and the model will predict its class.")
 
 uploaded_file = st.file_uploader("📁 Upload Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     # Open and display the uploaded image
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_container_width=True, class_="uploaded-image")
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Preprocess
     img_size = (224, 224)
@@ -143,11 +143,10 @@ if uploaded_file is not None:
         confidence = np.max(prediction)
 
     # Show result in attractive format
-    st.markdown(f"""
-        <div class="prediction-box">
-            <strong>Prediction:</strong> {predicted_class} with confidence <strong>{confidence:.0f}%</strong>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div class="prediction-box">', unsafe_allow_html=True)
+    st.markdown(f'<p class="result">✅ **Prediction:** {predicted_class}</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="confidence">🔍 **Confidence:** {confidence:.2%}</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# Footer section
-st.markdown('<div class="footer">© 2025 Kidney Disease Detection App</div>', unsafe_allow_html=True)
+# Closing the div of main layout
+st.markdown('</div>', unsafe_allow_html=True)
