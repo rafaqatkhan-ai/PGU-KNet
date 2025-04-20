@@ -45,8 +45,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-resnet_model = tf.keras.models.load_model('Models/ResNet_model.h5')
-efficientnet_model = tf.keras.models.load_model('Models/EfficientNet_model.h5')
+resnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5')
+efficientnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5')
 
 
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
