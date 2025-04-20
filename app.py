@@ -2,31 +2,32 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
-from tensorflow.keras.layers import Layer
 import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Fix for Unknown layer: 'Cast'
-class Cast(Layer):
-    def __init__(self, dtype, **kwargs):
-        super(Cast, self).__init__(**kwargs)
-        self.dtype = tf.dtypes.as_dtype(dtype)
+# Custom layers from your model
+class PositionalGatingUnit(tf.keras.layers.Layer):
+    def __init__(self, channels, **kwargs):
+        super(PositionalGatingUnit, self).__init__(**kwargs)
+        self.channels = channels
+        self.conv = tf.keras.layers.Conv2D(channels, (1, 1), activation='sigmoid')
 
-    def call(self, inputs):
-        return tf.cast(inputs, self.dtype)
+    def call(self, x):
+        pos = tf.reduce_mean(x, axis=[1, 2], keepdims=True)
+        gate = self.conv(pos)
+        return x * gate
 
     def get_config(self):
         config = super().get_config()
-        config.update({'dtype': self.dtype.name})
+        config.update({'channels': self.channels})
         return config
 
-# Add any other custom layers if needed
+# Define custom objects
 custom_objects = {
-    'Cast': Cast,
-    # Add other custom layers here if your model requires them
+    'PositionalGatingUnit': PositionalGatingUnit,
 }
 
 # Cache model loading with better error handling
@@ -46,19 +47,17 @@ def load_model_cached(path):
         st.error(f"Failed to load model: {str(e)}")
         return None
 
-# Load models with error handling
+# Load model with error handling
 try:
-    resnet_model = load_model_cached('Models/KidneyModel_Lightweight.h5')
-    efficientnet_model = resnet_model  # Using same model for both as in original code
-    
-    if resnet_model is None:
+    model = load_model_cached('KidneyModel_Lightweight.h5')
+    if model is None:
         st.error("Failed to load the model. Please check the model file.")
         st.stop()
 except Exception as e:
     st.error(f"An error occurred during model loading: {str(e)}")
     st.stop()
 
-# Class labels
+# Class labels (should match your training)
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
 # Page styling
@@ -114,9 +113,6 @@ st.markdown("""
 # App Title
 st.markdown('<h1 class="title">Kidney Disease Detection</h1>', unsafe_allow_html=True)
 
-# Model selection
-model_option = st.selectbox("Select a Model:", ["ResNet", "EfficientNet"])
-
 # File uploader
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
@@ -160,10 +156,8 @@ if uploaded_file is not None:
         if processed_image is None:
             st.stop()
         
-        selected_model = resnet_model if model_option == "ResNet" else efficientnet_model
-        
         with st.spinner('Making prediction...'):
-            label, confidence = make_prediction(processed_image, selected_model)
+            label, confidence = make_prediction(processed_image, model)
         
         if label and confidence:
             st.markdown(f"""
