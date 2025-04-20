@@ -15,12 +15,18 @@ class PositionalGatingUnit(tf.keras.layers.Layer):
     def call(self, inputs):
         pos = tf.reduce_mean(inputs, axis=[1, 2], keepdims=True)
         gate = self.conv(pos)
+        
+        # Cast inputs and gate to float32 to avoid dtype mismatch
+        inputs = tf.cast(inputs, tf.float32)
+        gate = tf.cast(gate, tf.float32)
+        
         return inputs * gate
 
     def get_config(self):
         config = super().get_config()
         config.update({'channels': self.channels})
         return config
+
 
 # Register dummy Cast layer for compatibility
 class Cast(tf.keras.layers.Layer):
