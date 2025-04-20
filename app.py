@@ -45,7 +45,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-resnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5')
+resnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5',compile=False)
 efficientnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5')
 
 
