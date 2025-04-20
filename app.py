@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import os
 import traceback
+import time  # Added this import to fix the error
 
 # Custom layer: PositionalGatingUnit
 class PositionalGatingUnit(tf.keras.layers.Layer):
@@ -173,17 +174,6 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
     }
     
-    /* Custom radio buttons */
-    .stRadio > div {
-        flex-direction: row;
-        align-items: center;
-    }
-    
-    .stRadio > div > label {
-        margin-right: 15px;
-        margin-left: 5px;
-    }
-    
     /* Image container */
     .image-container {
         border-radius: 15px;
@@ -233,49 +223,58 @@ with col1:
     uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     
     if uploaded_file is not None:
-        # Open and display the uploaded image
-        image = Image.open(uploaded_file).convert("RGB")
-        st.markdown('<div class="image-container">', unsafe_allow_html=True)
-        st.image(image, caption="Uploaded CT Scan", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        try:
+            # Open and display the uploaded image
+            image = Image.open(uploaded_file).convert("RGB")
+            st.markdown('<div class="image-container">', unsafe_allow_html=True)
+            st.image(image, caption="Uploaded CT Scan", use_column_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        except Exception as e:
+            st.error("❌ Failed to process the image. Please try another file.")
+            st.code(traceback.format_exc())
     
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col2:
     if uploaded_file is not None:
-        # Preprocess
-        img_size = (224, 224)
-        image = image.resize(img_size)
-        img_array = np.array(image) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
+        try:
+            # Preprocess
+            img_size = (224, 224)
+            image = image.resize(img_size)
+            img_array = np.array(image) / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
 
-        # Show progress bar while predicting
-        with st.spinner('Analyzing the CT scan...'):
-            progress_bar = st.progress(0)
-            for percent_complete in range(100):
-                time.sleep(0.01)  # Simulate processing time
-                progress_bar.progress(percent_complete + 1)
-            
-            prediction = model.predict(img_array)
-            predicted_class = class_names[np.argmax(prediction)]
-            confidence = np.max(prediction)
-
-        # Show result in attractive format
-        st.markdown(f"""
-            <div class="prediction-card">
-                <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">🔍 Analysis Results</h3>
-                <div class="result">Predicted Condition: <span class="highlight">{predicted_class}</span></div>
-                <div class="confidence">Confidence Level: <span class="highlight">{confidence:.2%}</span></div>
+            # Show progress bar while predicting
+            with st.spinner('Analyzing the CT scan...'):
+                progress_bar = st.progress(0)
+                for percent_complete in range(100):
+                    time.sleep(0.01)  # Simulate processing time
+                    progress_bar.progress(percent_complete + 1)
                 
-                <div style="margin-top: 2rem;">
-                    <h4 style="color: #2c3e50; margin-bottom: 0.5rem;">Probability Distribution:</h4>
-        """, unsafe_allow_html=True)
+                prediction = model.predict(img_array)
+                predicted_class = class_names[np.argmax(prediction)]
+                confidence = np.max(prediction)
+
+            # Show result in attractive format
+            st.markdown(f"""
+                <div class="prediction-card">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">🔍 Analysis Results</h3>
+                    <div class="result">Predicted Condition: <span class="highlight">{predicted_class}</span></div>
+                    <div class="confidence">Confidence Level: <span class="highlight">{confidence:.2%}</span></div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h4 style="color: #2c3e50; margin-bottom: 0.5rem;">Probability Distribution:</h4>
+            """, unsafe_allow_html=True)
+            
+            # Show probability distribution as a bar chart
+            prob_data = {class_names[i]: float(prediction[0][i]) for i in range(len(class_names))}
+            st.bar_chart(prob_data, color="#667eea", height=250)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
         
-        # Show probability distribution as a bar chart
-        prob_data = {class_names[i]: float(prediction[0][i]) for i in range(len(class_names))}
-        st.bar_chart(prob_data, color="#667eea", height=250)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+        except Exception as e:
+            st.error("❌ An error occurred during prediction. Please try again.")
+            st.code(traceback.format_exc())
     else:
         st.markdown("""
             <div style="background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 100%; 
