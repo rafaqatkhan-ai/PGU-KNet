@@ -2,8 +2,37 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
+from tensorflow.keras.layers import Layer
 
-# Custom CSS for styling
+# Fix for Unknown layer: 'Cast'
+class Cast(Layer):
+    def __init__(self, dtype, **kwargs):
+        super(Cast, self).__init__(**kwargs)
+        self.dtype_ = dtype
+
+    def call(self, inputs):
+        return tf.cast(inputs, self.dtype_)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({'dtype': self.dtype_})
+        return config
+
+custom_objects = {'Cast': Cast}
+
+# Cache model loading
+@st.cache_resource
+def load_model_cached(path):
+    return tf.keras.models.load_model(path, compile=False, custom_objects=custom_objects)
+
+# Load models
+resnet_model = load_model_cached('Models/KidneyModel_Lightweight.h5')
+efficientnet_model = load_model_cached('Models/KidneyModel_Lightweight.h5')
+
+# Class labels
+class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
+
+# Page styling
 st.markdown("""
     <style>
     body {
@@ -45,18 +74,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load models
-try:
-    resnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5', compile=False)
-    efficientnet_model = tf.keras.models.load_model('Models/KidneyModel_Lightweight.h5', compile=False)
-except Exception as e:
-    st.error(f"Error loading model: {e}")
-    st.stop()
+# App Title
+st.markdown('<h1 class="title">Kidney Disease Detection</h1>', unsafe_allow_html=True)
 
-# Class labels
-class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
+# Model selection
+model_option = st.selectbox("Select a Model:", ["ResNet", "EfficientNet"])
 
-# Preprocessing function
+# File uploader
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png"])
+
+# Image preprocessing
 def preprocess_image(image):
     image = np.array(image)
     image = tf.image.resize(image, (224, 224))
@@ -71,30 +98,18 @@ def make_prediction(image, model):
     confidence = np.max(pred) * 100
     return label, confidence
 
-# App Title
-st.markdown('<h1 class="title">Kidney Disease Detection</h1>', unsafe_allow_html=True)
-
-# Model selection dropdown
-model_option = st.selectbox("Select a Model:", ["ResNet", "EfficientNet"])
-
-# Image uploader
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
+# Main workflow
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     st.image(image, caption="Uploaded Image", use_container_width=True)
-
-    # Preprocess and predict
     processed_image = preprocess_image(image)
-    selected_model = resnet_model if model_option == "ResNet" else efficientnet_model
 
+    selected_model = resnet_model if model_option == "ResNet" else efficientnet_model
     label, confidence = make_prediction(processed_image, selected_model)
 
-    # Display prediction
     st.markdown(f"""
     <div class="prediction-box">
-        <strong>Prediction:</strong> {label} <br>
-        <strong>Confidence:</strong> {confidence:.2f}%
+        <strong>Prediction:</strong> {label} with confidence <strong>{confidence:.0f}%</strong>
     </div>
     """, unsafe_allow_html=True)
 
