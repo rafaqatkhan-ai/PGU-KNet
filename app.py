@@ -27,7 +27,6 @@ class PositionalGatingUnit(tf.keras.layers.Layer):
         config.update({'channels': self.channels})
         return config
 
-
 # Register dummy Cast layer for compatibility
 class Cast(tf.keras.layers.Layer):
     def __init__(self, dtype='float32', **kwargs):
@@ -65,7 +64,46 @@ def load_model():
 model = load_model()
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
-# UI
+# UI - Customizing appearance
+st.set_page_config(page_title="CT Kidney Image Classifier", page_icon="🧠", layout="centered")
+
+# Custom CSS to make the app more attractive
+st.markdown("""
+    <style>
+    .main {
+        background-color: #f4f4f9;
+        color: #333;
+        padding: 20px;
+    }
+    .title {
+        font-size: 36px;
+        color: #1e1e1e;
+        font-weight: bold;
+    }
+    .upload-text {
+        font-size: 18px;
+        color: #0073e6;
+    }
+    .result {
+        font-size: 24px;
+        color: #4CAF50;
+        font-weight: bold;
+    }
+    .confidence {
+        font-size: 20px;
+        color: #FF5722;
+    }
+    .prediction-box {
+        background-color: #e0f7fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# UI content
+st.markdown('<div class="main">', unsafe_allow_html=True)
 st.title("🧠 CT Kidney Image Classifier")
 st.write("Upload a CT kidney image, and the model will predict its class.")
 
@@ -82,10 +120,16 @@ if uploaded_file is not None:
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    # Predict
-    prediction = model.predict(img_array)
-    predicted_class = class_names[np.argmax(prediction)]
-    confidence = np.max(prediction)
+    # Show progress bar while predicting
+    with st.spinner('Classifying the image...'):
+        prediction = model.predict(img_array)
+        predicted_class = class_names[np.argmax(prediction)]
+        confidence = np.max(prediction)
 
-    st.markdown(f"### ✅ **Prediction:** `{predicted_class}`")
-    st.markdown(f"### 🔍 **Confidence:** `{confidence:.2%}`")
+    # Show result in attractive format
+    st.markdown(f'<div class="prediction-box">', unsafe_allow_html=True)
+    st.markdown(f'<p class="result">✅ **Prediction:** {predicted_class}</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="confidence">🔍 **Confidence:** {confidence:.2%}</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
