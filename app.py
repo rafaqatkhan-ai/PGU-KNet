@@ -5,26 +5,27 @@ from PIL import Image
 
 # Custom layer definition (needed for model loading)
 class PositionalGatingUnit(tf.keras.layers.Layer):
-    def __init__(self, channels, **kwargs):
-        super(PositionalGatingUnit, self).__init__(**kwargs)
+    def __init__(self, channels=32, **kwargs):
+        super().__init__(**kwargs)
         self.channels = channels
         self.conv = tf.keras.layers.Conv2D(channels, (1, 1), activation='sigmoid')
 
-    def call(self, x):
-        pos = tf.reduce_mean(x, axis=[1, 2], keepdims=True)
+    def call(self, inputs):
+        pos = tf.reduce_mean(inputs, axis=[1, 2], keepdims=True)
         gate = self.conv(pos)
-        return x * gate
+        return inputs * gate
 
     def get_config(self):
-        config = super(PositionalGatingUnit, self).get_config()
-        config.update({"channels": self.channels})
+        config = super().get_config()
+        config.update({'channels': self.channels})
         return config
 
-# Load model with custom object
+
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("Models/KidneyModel_Lightweight.h5", 
+    return tf.keras.models.load_model("Models/KidneyModel_Lightweight.h5",
                                       custom_objects={'PositionalGatingUnit': PositionalGatingUnit})
+
 
 model = load_model()
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']  # Update if necessary
