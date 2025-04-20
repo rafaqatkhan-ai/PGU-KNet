@@ -49,7 +49,7 @@ def load_model_cached(path):
 
 # Load model with error handling
 try:
-    model = load_model_cached('KidneyModel_Lightweight.h5')
+    model = load_model_cached('Models/KidneyModel_Lightweight.h5')
     if model is None:
         st.error("Failed to load the model. Please check the model file.")
         st.stop()
