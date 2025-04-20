@@ -25,9 +25,33 @@ class PositionalGatingUnit(tf.keras.layers.Layer):
         config.update({'channels': self.channels})
         return config
 
+# Proper implementation of Cast layer for mixed precision
+class CastToFloat16(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    def call(self, inputs):
+        return tf.cast(inputs, tf.float16)
+        
+    def get_config(self):
+        return super().get_config()
+
+class CastToFloat32(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    def call(self, inputs):
+        return tf.cast(inputs, tf.float32)
+        
+    def get_config(self):
+        return super().get_config()
+
 # Define custom objects
 custom_objects = {
     'PositionalGatingUnit': PositionalGatingUnit,
+    'CastToFloat16': CastToFloat16,
+    'CastToFloat32': CastToFloat32,
+    # Add any other custom layers your model might use
 }
 
 # Cache model loading with better error handling
@@ -57,7 +81,7 @@ except Exception as e:
     st.error(f"An error occurred during model loading: {str(e)}")
     st.stop()
 
-# Class labels (should match your training)
+# Rest of your code remains the same...
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
 # Page styling
