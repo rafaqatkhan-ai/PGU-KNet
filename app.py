@@ -5,7 +5,7 @@ from PIL import Image
 import os
 import traceback
 
-# Define your custom layer class
+# Custom layer: PositionalGatingUnit
 class PositionalGatingUnit(tf.keras.layers.Layer):
     def __init__(self, channels=32, **kwargs):
         super().__init__(**kwargs)
@@ -22,14 +22,31 @@ class PositionalGatingUnit(tf.keras.layers.Layer):
         config.update({'channels': self.channels})
         return config
 
-# Load the model with caching
+# Register dummy Cast layer for compatibility
+class Cast(tf.keras.layers.Layer):
+    def __init__(self, dtype='float32', **kwargs):
+        super().__init__(**kwargs)
+        self.dtype = tf.dtypes.as_dtype(dtype)
+
+    def call(self, inputs):
+        return tf.cast(inputs, self.dtype)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({'dtype': self.dtype.name})
+        return config
+
+# Load the model safely with custom layers
 @st.cache_resource
 def load_model():
     model_path = os.path.join("Models", "KidneyModel_Lightweight.h5")
     try:
         model = tf.keras.models.load_model(
             model_path,
-            custom_objects={'PositionalGatingUnit': PositionalGatingUnit}
+            custom_objects={
+                'PositionalGatingUnit': PositionalGatingUnit,
+                'Cast': Cast
+            }
         )
         return model
     except Exception as e:
@@ -39,11 +56,9 @@ def load_model():
 
 # Load model
 model = load_model()
-
-# Define class labels
 class_names = ['Cyst', 'Normal', 'Stone', 'Tumor']
 
-# Streamlit UI
+# UI
 st.title("🧠 CT Kidney Image Classifier")
 st.write("Upload a CT kidney image, and the model will predict its class.")
 
