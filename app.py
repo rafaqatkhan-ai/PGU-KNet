@@ -120,7 +120,7 @@ st.markdown("""
 
 # UI content
 st.markdown('<div class="main">', unsafe_allow_html=True)
-st.title("🧠 CT Kidney Image Classifier")
+st.title("🧠 PGU-KNet CT Kidney Image Classifier")
 st.write("Upload a CT kidney image, and the model will predict its class.")
 
 uploaded_file = st.file_uploader("📁 Upload Image", type=["jpg", "jpeg", "png"])
